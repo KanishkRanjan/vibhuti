@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { MapPin, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -14,28 +14,53 @@ import {
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
+  const [location, navigate] = useLocation();
+
+  const isActive = (path: string) => location === path;
 
   return (
     <header className="glass-nav">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300">
+        <button onClick={() => navigate("/")} className="flex items-center gap-2 group hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300">
             <MapPin className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="font-display font-bold text-xl tracking-tight text-foreground block leading-none">CivicConnect</span>
+            <span className="font-display font-bold text-xl tracking-tight text-foreground block leading-none">NagarSetu</span>
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider block">Municipal Portal</span>
           </div>
-        </Link>
+        </button>
 
-        <nav className="flex items-center gap-4">
+        <nav className="hidden md:flex items-center gap-8">
+          <button 
+            onClick={() => navigate("/")}
+            className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Home
+          </button>
+          <a href="#" className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground">
+            Community
+          </a>
+          {isAuthenticated && (
+            <button 
+              onClick={() => navigate("/issues/new")}
+              className={`text-sm font-medium transition-colors ${isActive('/issues/new') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Report Issue
+            </button>
+          )}
+        </nav>
+
+        <div className="flex items-center gap-4">
           {isAuthenticated && user ? (
             <>
-              <Link href="/issues/new">
-                <Button variant="outline" className="hidden md:flex rounded-full border-border/80 hover:bg-primary/5 hover:text-primary">
-                  Report Issue
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => navigate("/issues/new")}
+                variant="outline" 
+                className="hidden md:flex rounded-full border-border/80 hover:bg-primary/5 hover:text-primary"
+              >
+                Report Issue
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -59,11 +84,9 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer w-full flex items-center">
-                      <UserIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                      Profile & Settings
-                    </Link>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <UserIcon className="w-4 h-4 mr-2 text-muted-foreground" />
+                    Profile & Settings
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive cursor-pointer">
                     <LogOut className="w-4 h-4 mr-2" />
@@ -80,7 +103,7 @@ export function Navbar() {
               </a>
             </Button>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );

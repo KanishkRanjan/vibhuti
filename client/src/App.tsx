@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 // Components
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { AadhaarPrompt } from "@/components/AadhaarPrompt";
 import NotFound from "@/pages/not-found";
 
@@ -54,6 +55,7 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </main>
+      <Footer />
     </div>
   );
 }
