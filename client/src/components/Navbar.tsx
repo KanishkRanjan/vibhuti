@@ -27,7 +27,6 @@ export function Navbar() {
           </div>
           <div>
             <span className="font-display font-bold text-xl tracking-tight text-foreground block leading-none">NagarSetu</span>
-            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider block">Municipal Portal</span>
           </div>
         </button>
 

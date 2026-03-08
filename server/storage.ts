@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { issues, profiles, upvotes } from "@shared/schema";
+import { issues, profiles, upvotes, users } from "@shared/schema";
 import type { InsertIssue, IssueResponse, Profile, InsertProfile } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 
@@ -16,33 +16,27 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   
   async getIssues(userId?: string): Promise<IssueResponse[]> {
-    const allIssues = await db.query.issues.findMany({
-      orderBy: [desc(issues.createdAt)],
-      with: {
-        // author connection is defined indirectly via users table, doing manual join to be safe
-      }
-    });
+    const allIssues = await db.select().from(issues).orderBy(desc(issues.createdAt));
 
-    // Instead of using complex Drizzle relations, we'll do raw SQL for stats for robustness, or manual fetching
     const issuesList: IssueResponse[] = [];
     
     for (const issue of allIssues) {
       // Get author name
-      const [author] = await db.execute(sql`SELECT first_name, last_name FROM users WHERE id = ${issue.authorId}`);
+      const [author] = await db.select({ firstName: users.firstName, lastName: users.lastName }).from(users).where(eq(users.id, issue.authorId));
       let authorName = "Unknown";
       if (author) {
-        authorName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || "Unknown User";
+        authorName = `${author.firstName || ''} ${author.lastName || ''}`.trim() || "Unknown User";
       }
 
       // Get upvotes count
-      const [upvoteCountResult] = await db.execute(sql`SELECT COUNT(*) FROM upvotes WHERE issue_id = ${issue.id}`);
-      const upvotesCount = Number(upvoteCountResult?.count || 0);
+      const upvoteCount = await db.select({ count: sql<number>`count(*)` }).from(upvotes).where(eq(upvotes.issueId, issue.id));
+      const upvotesCount = Number(upvoteCount[0]?.count || 0);
 
       // Check if current user has upvoted
       let hasUpvoted = false;
       if (userId) {
-        const [userUpvote] = await db.execute(sql`SELECT 1 FROM upvotes WHERE issue_id = ${issue.id} AND user_id = ${userId}`);
-        hasUpvoted = !!userUpvote;
+        const userUpvote = await db.select().from(upvotes).where(and(eq(upvotes.issueId, issue.id), eq(upvotes.userId, userId)));
+        hasUpvoted = userUpvote.length > 0;
       }
 
       issuesList.push({
@@ -60,19 +54,19 @@ export class DatabaseStorage implements IStorage {
     const [issue] = await db.select().from(issues).where(eq(issues.id, id));
     if (!issue) return undefined;
 
-    const [author] = await db.execute(sql`SELECT first_name, last_name FROM users WHERE id = ${issue.authorId}`);
+    const [author] = await db.select({ firstName: users.firstName, lastName: users.lastName }).from(users).where(eq(users.id, issue.authorId));
     let authorName = "Unknown";
     if (author) {
-      authorName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || "Unknown User";
+      authorName = `${author.firstName || ''} ${author.lastName || ''}`.trim() || "Unknown User";
     }
 
-    const [upvoteCountResult] = await db.execute(sql`SELECT COUNT(*) FROM upvotes WHERE issue_id = ${issue.id}`);
-    const upvotesCount = Number(upvoteCountResult?.count || 0);
+    const upvoteCount = await db.select({ count: sql<number>`count(*)` }).from(upvotes).where(eq(upvotes.issueId, issue.id));
+    const upvotesCount = Number(upvoteCount[0]?.count || 0);
 
     let hasUpvoted = false;
     if (userId) {
-      const [userUpvote] = await db.execute(sql`SELECT 1 FROM upvotes WHERE issue_id = ${issue.id} AND user_id = ${userId}`);
-      hasUpvoted = !!userUpvote;
+      const userUpvote = await db.select().from(upvotes).where(and(eq(upvotes.issueId, issue.id), eq(upvotes.userId, userId)));
+      hasUpvoted = userUpvote.length > 0;
     }
 
     return {
@@ -110,10 +104,10 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
-    const [upvoteCountResult] = await db.execute(sql`SELECT COUNT(*) FROM upvotes WHERE issue_id = ${issueId}`);
+    const upvoteCount = await db.select({ count: sql<number>`count(*)` }).from(upvotes).where(eq(upvotes.issueId, issueId));
     
     return {
-      upvotesCount: Number(upvoteCountResult?.count || 0),
+      upvotesCount: Number(upvoteCount[0]?.count || 0),
       hasUpvoted: !existing
     };
   }
