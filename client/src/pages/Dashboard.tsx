@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Plus, Filter, Loader2, AlertCircle } from "lucide-react";
 import { useIssues } from "@/hooks/use-issues";
 import { IssueCard } from "@/components/IssueCard";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const CATEGORIES = ["All", "Roads", "Water", "Electricity", "Sanitation", "Others"];
 
 export default function Dashboard() {
+  const [_, navigate] = useLocation();
   const { data: issues, isLoading, isError } = useIssues();
   const [filter, setFilter] = useState("All");
 
@@ -24,12 +25,10 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-lg">Browse and support civic improvements in your area.</p>
         </div>
         
-        <Link href="/issues/new">
-          <Button className="rounded-xl h-12 px-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all w-full md:w-auto">
-            <Plus className="w-5 h-5 mr-2" />
-            Report New Issue
-          </Button>
-        </Link>
+        <Button onClick={() => navigate("/issues/new")} className="rounded-xl h-12 px-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all w-full md:w-auto">
+          <Plus className="w-5 h-5 mr-2" />
+          Report New Issue
+        </Button>
       </div>
 
       {/* Filter Tabs */}
@@ -54,46 +53,37 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Content */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="rounded-2xl border bg-card p-6 flex flex-col gap-4">
-              <Skeleton className="h-48 w-full rounded-xl" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
+      {/* Issues Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-40 w-full rounded-2xl" />
+              <Skeleton className="h-4 w-3/4 rounded" />
+              <Skeleton className="h-4 w-1/2 rounded" />
             </div>
-          ))}
-        </div>
-      ) : isError ? (
-        <div className="text-center py-20 bg-destructive/5 rounded-3xl border border-destructive/20">
-          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-destructive mb-2">Failed to load issues</h3>
-          <p className="text-muted-foreground">Please try refreshing the page.</p>
-        </div>
-      ) : filteredIssues.length === 0 ? (
-        <div className="text-center py-24 bg-card rounded-3xl border border-dashed border-border">
-          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-            <Filter className="w-10 h-10 text-muted-foreground" />
+          ))
+        ) : isError ? (
+          <div className="col-span-full py-12 text-center">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold mb-2">Failed to load issues</h3>
+            <p className="text-muted-foreground">Please try refreshing the page.</p>
           </div>
-          <h3 className="text-2xl font-display font-bold mb-3">No issues found</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-8">
-            There are currently no reported issues in this category. Be the first to report a problem in your neighborhood.
-          </p>
-          <Link href="/issues/new">
-            <Button variant="outline" className="rounded-xl h-12 px-6">
-              Report an Issue
+        ) : filteredIssues.length === 0 ? (
+          <div className="col-span-full py-12 text-center">
+            <p className="text-muted-foreground mb-4">No issues found in this category</p>
+            <Button onClick={() => setFilter("All")} variant="outline">
+              View all issues
             </Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredIssues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} />
-          ))}
-        </div>
-      )}
+          </div>
+        ) : (
+          filteredIssues.map((issue) => (
+            <div key={issue.id} onClick={() => navigate(`/issues/detail?id=${issue.id}`)} className="cursor-pointer">
+              <IssueCard issue={issue} />
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

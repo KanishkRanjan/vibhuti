@@ -1,8 +1,9 @@
 import { useLocation } from "wouter";
-import { MapPin, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import nagarSetuLogo from "@assets/image_1773048982249.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,10 +22,8 @@ export function Navbar() {
   return (
     <header className="glass-nav">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <button onClick={() => navigate("/")} className="flex items-center gap-2 group hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300">
-            <MapPin className="w-6 h-6 text-white" />
-          </div>
+        <button onClick={() => navigate("/")} className="flex items-center gap-3 group hover:opacity-80 transition-opacity">
+          <img src={nagarSetuLogo} alt="NagarSetu" className="h-12 w-auto" />
           <div>
             <span className="font-display font-bold text-xl tracking-tight text-foreground block leading-none">NagarSetu</span>
           </div>

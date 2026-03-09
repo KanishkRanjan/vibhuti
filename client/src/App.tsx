@@ -16,6 +16,7 @@ import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import CreateIssue from "@/pages/CreateIssue";
 import Profile from "@/pages/Profile";
+import IssueDetail from "@/pages/IssueDetail";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -48,6 +49,9 @@ function Router() {
           <Route path="/" component={HomeRouter} />
           <Route path="/issues/new">
             {() => <ProtectedRoute component={CreateIssue} />}
+          </Route>
+          <Route path="/issues/detail">
+            {() => <ProtectedRoute component={IssueDetail} />}
           </Route>
           <Route path="/profile">
             {() => <ProtectedRoute component={Profile} />}

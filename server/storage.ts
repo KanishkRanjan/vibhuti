@@ -47,6 +47,9 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
+    // Sort by upvotes descending
+    issuesList.sort((a, b) => b.upvotesCount - a.upvotesCount);
+    
     return issuesList;
   }
 
