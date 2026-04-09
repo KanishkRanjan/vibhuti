@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { insertIssueSchema, insertProfileSchema, issues, profiles } from "./schema";
+import type { IssueResponse as IssueResponseType, LeaderboardEntry } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -20,14 +21,14 @@ export const api = {
       method: 'GET' as const,
       path: '/api/issues' as const,
       responses: {
-        200: z.array(z.custom<typeof issues.$inferSelect & { authorName?: string | null, upvotesCount: number, hasUpvoted: boolean }>()),
+        200: z.array(z.custom<IssueResponseType>()),
       },
     },
     get: {
       method: 'GET' as const,
       path: '/api/issues/:id' as const,
       responses: {
-        200: z.custom<typeof issues.$inferSelect & { authorName?: string | null, upvotesCount: number, hasUpvoted: boolean }>(),
+        200: z.custom<IssueResponseType>(),
         404: errorSchemas.notFound,
       },
     },
@@ -61,7 +62,7 @@ export const api = {
     upsert: {
       method: 'POST' as const,
       path: '/api/profile' as const,
-      input: insertProfileSchema.omit({ userId: true }),
+      input: insertProfileSchema.omit({ userId: true, points: true, badge: true }),
       responses: {
         200: z.custom<typeof profiles.$inferSelect>(),
         400: errorSchemas.validation,
@@ -83,7 +84,8 @@ export function buildUrl(path: string, params?: Record<string, string | number>)
 }
 
 export type IssueInput = z.infer<typeof api.issues.create.input>;
-export type IssueResponse = z.infer<typeof api.issues.create.responses[201]>;
-export type IssuesListResponse = z.infer<typeof api.issues.list.responses[200]>;
+export type IssueResponse = IssueResponseType;
+export type IssuesListResponse = IssueResponseType[];
 export type ProfileInput = z.infer<typeof api.profile.upsert.input>;
 export type ProfileResponse = z.infer<typeof api.profile.upsert.responses[200]>;
+export type { LeaderboardEntry };

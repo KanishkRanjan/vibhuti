@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { MapPin } from "lucide-react";
+import nagarSetuLogo from "@assets/image_1773048982249.png";
 
 export function Footer() {
   const [_, navigate] = useLocation();
@@ -10,9 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-white" />
-              </div>
+              <img src={nagarSetuLogo} alt="NagarSetu" className="h-8 w-auto" />
               <span className="font-display font-bold text-foreground">NagarSetu</span>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -29,9 +27,9 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Community
-                </a>
+                <button onClick={() => navigate("/leaderboard")} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  Leaderboard
+                </button>
               </li>
               <li>
                 <button onClick={() => navigate("/issues/new")} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
@@ -42,32 +40,28 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-bold text-foreground mb-4">Support</h4>
+            <h4 className="font-display font-bold text-foreground mb-4">Portals</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</a>
+                <button onClick={() => navigate("/admin/login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  DM Admin Portal
+                </button>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact Us</a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
+                <button onClick={() => navigate("/municipal/login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  Municipal Corp Portal
+                </button>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-display font-bold text-foreground mb-4">Legal</h4>
+            <h4 className="font-display font-bold text-foreground mb-4">Support</h4>
             <ul className="space-y-2">
-              <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a>
-              </li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</a></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
             </ul>
           </div>
         </div>

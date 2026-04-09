@@ -1,0 +1,129 @@
+Add a dedicated Admin Portal for District Magistrate (DM) with the following:
+
+1. SEPARATE LOGIN ROUTE
+   - Route: /admin/login
+   - Role-based auth: admin role with a separate credentials table
+   - Redirect to /admin/dashboard after login
+
+2. ADMIN DASHBOARD — Issue Overview
+   - Summary cards at the top showing:
+     • Total issues reported
+     • Issues resolved this month
+     • Issues in-progress
+     • Issues overdue (> 7 days unresolved)
+   - A searchable, filterable table showing ALL issues with columns:
+     • Issue ID, Title, Category, Ward/Area
+     • Reported Date
+     • Assigned Municipal Corporation (with their name)
+     • Current Status (Pending / Claimed / In Progress / Resolved)
+     • Days Open
+     • Resolution Notes (if any)
+   - Filter by: Status, Municipal Corporation, Category, Date Range, Ward
+   - Export to CSV button
+
+3. PER-MUNICIPAL BREAKDOWN PAGE
+   - Route: /admin/municipal/:id
+   - Shows a specific municipal corporation's performance:
+     • Total issues assigned to them
+     • Issues resolved vs pending vs overdue
+     • Average resolution time (in days)
+     • List of all their issues with full details
+     • Status timeline per issue (claimed → in progress → resolved)
+
+4. ISSUE DETAIL PAGE (accessible from admin)
+   - Route: /admin/issue/:id
+   - Full timeline of the issue: reported → claimed → updates → resolved
+   - All comments/notes added by the municipal corporation
+   - Photos/attachments if any
+   - Option for DM to mark issue as "Escalated" or add a note
+
+── FEATURE 2: MUNICIPAL CORPORATION LOGIN & ISSUE CLAIMING ─
+
+Add a Municipal Corporation portal with the following:
+
+1. SEPARATE LOGIN ROUTE
+   - Route: /municipal/login
+   - A separate user role: municipal_corp
+   - Each municipal corporation has one login (username + password)
+   - After login, redirect to /municipal/dashboard
+
+2. MUNICIPAL DASHBOARD
+   - Shows only the issues in their jurisdiction/ward
+   - Summary: Claimed, In Progress, Resolved counts
+   - Unclaimed issues feed — issues near their area not yet claimed by anyone
+
+3. CLAIM AN ISSUE
+   - From the unclaimed feed, municipal can click "Claim This Issue"
+   - On claiming:
+     • Issue status changes to "Claimed"
+     • Issue is now linked to that municipal corporation's account
+     • Timestamp of claim is saved
+   - They CANNOT claim an issue already claimed by another corporation
+
+4. UPDATE ISSUE STATUS
+   - After claiming, the municipal corp can:
+     • Set status to "In Progress" (with a text note)
+     • Set status to "Resolved" (with required resolution note + optional photo upload)
+     • Each status change is timestamped and logged
+   - Add progress comments/updates visible in the issue timeline
+
+5. ISSUE HISTORY
+   - Municipal corp can see all past issues they have handled
+   - Resolved issues show their resolution note and date
+
+── FEATURE 3: RANKING & LEADERBOARD SYSTEM ─────────────────
+
+Add a full ranking system for citizens who report issues and help the community:
+
+1. POINTS SYSTEM (save in user profile)
+   Points are awarded automatically when:
+   • User reports a new issue             → +10 points
+   • Reported issue gets claimed          → +5 points (bonus for valid report)
+   • Reported issue gets resolved         → +20 points
+   • User adds a helpful comment/update   → +3 points
+   • User uploads photo evidence          → +5 points
+   • Issue resolved within 3 days        → +10 bonus points
+   Points are DEDUCTED for:
+   • Report marked as duplicate/spam     → -5 points
+
+2. BADGE / TIER SYSTEM
+   Assign badges based on total points:
+   • 0–49 pts    → "Citizen" (gray badge)
+   • 50–149 pts  → "Active Member" (bronze badge)
+   • 150–499 pts → "Community Hero" (silver badge)
+   • 500–999 pts → "Ward Champion" (gold badge)
+   • 1000+ pts   → "City Legend" (platinum badge)
+   Show the badge prominently on the user's profile page.
+
+3. PUBLIC LEADERBOARD PAGE
+   - Route: /leaderboard
+   - Shows top 50 citizens ranked by total points
+   - Columns: Rank, Avatar/Initials, Name, Badge, Issues Reported, Issues Resolved, Points
+   - Filter by: This Week / This Month / All Time
+   - Current logged-in user's rank highlighted even if outside top 50
+
+4. USER PROFILE UPDATES
+   - Show total points, current badge, and rank on profile
+   - Show a breakdown: "You earned X points from reports, Y from resolutions"
+   - Show recent point activity log (e.g. "+20 pts — Issue #342 resolved")
+
+5. DATABASE CHANGES NEEDED
+   - Add points column to users table (default 0)
+   - Add point_log table: user_id, points_change, reason, issue_id, timestamp
+   - Add badge column to users table (computed or stored)
+   - Leaderboard query: SELECT user_id, SUM(points_change) ranked by total
+
+6. UI INTEGRATION
+   - Show small badge icon next to user name everywhere in the app
+   - On issue cards, show reporter's badge
+   - Add leaderboard link to main navigation
+
+── GENERAL IMPLEMENTATION NOTES ─────────────────────────────
+
+- Use the same tech stack already in the project (do not change framework)
+- Maintain the existing UI design language for new pages
+- All new routes must be protected (redirect to login if not authenticated)
+- Admin and Municipal Corp portals must be completely separate from the citizen-facing app
+- Add role field to users/sessions: "citizen" | "municipal_corp" | "admin"
+- Make sure the middleware checks role before allowing access to /admin/* and /municipal/* routes
+- All point awards should be triggered automatically via hooks/events, not manual entry

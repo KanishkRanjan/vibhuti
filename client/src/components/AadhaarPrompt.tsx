@@ -5,7 +5,6 @@ import { z } from "zod";
 import { ShieldAlert, Fingerprint, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
-import { insertProfileSchema } from "@shared/schema";
 
 import {
   Dialog,
@@ -19,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 
-const formSchema = insertProfileSchema.omit({ userId: true }).extend({
+const formSchema = z.object({
   aadhaarNumber: z.string().regex(/^\d{12}$/, "Aadhaar must be exactly 12 digits"),
 });
 
@@ -33,7 +32,7 @@ export function AadhaarPrompt() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && !isLoadingProfile && !profile) {
+    if (isAuthenticated && !isLoadingProfile && (!profile || !profile.aadhaarNumber)) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
