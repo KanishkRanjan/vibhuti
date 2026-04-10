@@ -35,7 +35,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.REPL_ID !== "local_dev_repl_id",
       maxAge: sessionTtl,
     },
   });
@@ -103,7 +103,33 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
+  app.get("/api/login", async (req, res, next) => {
+    if (process.env.REPL_ID === "local_dev_repl_id") {
+      // Mock local login for docker environments without a real Replit App
+      const mockUser = {
+        sub: "local_dev_user", // upsertUser maps 'sub' to 'id'
+        email: "developer@example.com",
+        first_name: "Local",
+        last_name: "Developer",
+        profile_image_url: "https://avatars.githubusercontent.com/u/1?v=4",
+      };
+
+      const userObj = {
+        claims: { ...mockUser, exp: Math.floor(Date.now() / 1000) + 86400 },
+        access_token: "mock_access_token",
+        refresh_token: "mock_refresh_token",
+        expires_at: Math.floor(Date.now() / 1000) + 86400,
+      };
+
+      await upsertUser(mockUser);
+
+      req.login(userObj, (err) => {
+        if (err) return next(err);
+        return res.redirect("/");
+      });
+      return;
+    }
+
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
@@ -120,7 +146,10 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
-    req.logout(() => {
+    req.logout((err) => {
+      if (process.env.REPL_ID === "local_dev_repl_id") {
+        return res.redirect("/");
+      }
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,

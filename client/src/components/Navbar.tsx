@@ -107,11 +107,12 @@ export function Navbar() {
               </DropdownMenu>
             </>
           ) : (
-            <Button asChild className="rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
-              <a href="/api/login">
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </a>
+            <Button 
+              className="rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+              onClick={() => { window.location.href = "/api/login"; }}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Sign In
             </Button>
           )}
         </div>
